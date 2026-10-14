@@ -1048,7 +1048,7 @@ gh_thing::~gh_thing (void)
             GH_THING_LOG(next, "next");
         }
 
-        GH_THROW("prev still set");
+        GH_ERR("prev still set");
     }
 
     //
@@ -1085,7 +1085,7 @@ gh_thing::~gh_thing (void)
             GH_THING_LOG(limb_next, "limb_next");
         }
 
-        GH_THROW("limb_prev still set");
+        GH_ERR("limb_prev still set");
     }
 
     //

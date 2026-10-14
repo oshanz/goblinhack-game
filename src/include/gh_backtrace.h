@@ -24,34 +24,36 @@
 #ifndef _GH_BACKTRACE_H_
 #define _GH_BACKTRACE_H_
 
-extern const char **gh_function_names;
-extern const char **gh_function_files;
-extern uint16 *gh_function_lines;
+#define GH_FUNCTION_MAX_DEPTH 1024
+
 extern int gh_function_indent_depth;
 extern void gh_function_trace(void);
+extern void gh_function_push(const char *file, const char *name, uint16 line);
 
 #define GH_FUNCTION()                                           \
-        gh_function destroyed_on_exit;                          \
-                                                                \
-        *(gh_function_files++) = __FILE__;                      \
-        *(gh_function_names++) = __FUNCTION__;                  \
-        *(gh_function_lines++) = __LINE__;                      \
+        gh_function destroyed_on_exit(__FILE__,                 \
+                                      __FUNCTION__,             \
+                                      __LINE__);                \
                                                                 \
         if (gh_global::trace_mode) {                            \
             gh_function_trace();                                \
         }
 
+//
+// Frames beyond GH_FUNCTION_MAX_DEPTH are counted but not recorded, so deep
+// recursion cannot overrun the trace arrays.
+//
 class gh_function {
 public:
-    gh_inline gh_function (void) {
+    gh_inline gh_function (const char *file,
+                           const char *name,
+                           uint16 line) {
+        gh_function_push(file, name, line);
         gh_function_indent_depth++;
     }
 
     gh_inline ~gh_function () {
         gh_function_indent_depth--;
-        gh_function_files--;
-        gh_function_names--;
-        gh_function_lines--;
     }
 };
 

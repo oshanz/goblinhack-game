@@ -24,38 +24,52 @@
 #include <ghack.h>
 #include <stdio.h>
 
-static const char *gh_function_names_arr[1024];
-static const char *gh_function_files_arr[1024];
-static uint16 gh_function_lines_arr[1024];
+static const char *gh_function_names_arr[GH_FUNCTION_MAX_DEPTH];
+static const char *gh_function_files_arr[GH_FUNCTION_MAX_DEPTH];
+static uint16 gh_function_lines_arr[GH_FUNCTION_MAX_DEPTH];
 static const char gh_indent[] = "            CRASH SOON !!! ......................................................................................................................................................................................................................................................................................................................................................................................................................................................................";
-
-const char **gh_function_names = gh_function_names_arr;
-const char **gh_function_files = gh_function_files_arr;
-uint16 *gh_function_lines = gh_function_lines_arr;
 
 int gh_function_indent_depth;
 
-static inline const char *gh_indent_show (const int depth)
+//
+// Record a frame at the current depth, if there is room.
+//
+void gh_function_push (const char *file, const char *name, uint16 line)
 {
+    const int depth = gh_function_indent_depth;
+
+    if ((depth >= 0) && (depth < GH_FUNCTION_MAX_DEPTH)) {
+        gh_function_files_arr[depth] = file;
+        gh_function_names_arr[depth] = name;
+        gh_function_lines_arr[depth] = line;
+    }
+}
+
+static inline int gh_depth_recorded (void)
+{
+    if (gh_function_indent_depth > GH_FUNCTION_MAX_DEPTH) {
+        return (GH_FUNCTION_MAX_DEPTH);
+    }
+    return (gh_function_indent_depth);
+}
+
+static inline const char *gh_indent_show (int depth)
+{
+    if (depth > (int)sizeof(gh_indent) - 1) {
+        depth = sizeof(gh_indent) - 1;
+    }
     return (&gh_indent[sizeof(gh_indent) - depth]);
 }
 
 void gh_backtrace_init (void)
 {
-    if (gh_function_names) {
-        return;
-    }
-
-    gh_function_names = gh_function_names_arr;
-    gh_function_files = gh_function_files_arr;
-    gh_function_lines = gh_function_lines_arr;
 }
 
 void gh_backtrace (void)
 {
     fprintf(stderr, "backtrace:\n");
 
-    for (int depth=0; depth < gh_function_indent_depth; depth++) {
+    for (int depth=0; depth < gh_depth_recorded(); depth++) {
         fprintf(stderr,
                 "%30s:%-3d %*s%s()\n",
                 gh_function_files_arr[depth],
@@ -68,7 +82,7 @@ void gh_backtrace (void)
 
     fprintf(stdout, "backtrace:\n");
 
-    for (int depth=0; depth < gh_function_indent_depth; depth++) {
+    for (int depth=0; depth < gh_depth_recorded(); depth++) {
         fprintf(stdout,
                 "%30s:%-3d %*s%s()\n",
                 gh_function_files_arr[depth],
@@ -83,6 +97,10 @@ void gh_backtrace (void)
 void gh_function_trace (void)
 {
     int depth = gh_function_indent_depth - 1;
+
+    if ((depth < 0) || (depth >= GH_FUNCTION_MAX_DEPTH)) {
+        return;
+    }
 
     printf("%30s:%-3d %*s%s()\n",
            gh_function_files_arr[depth],

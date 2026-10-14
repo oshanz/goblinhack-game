@@ -38,8 +38,13 @@ void string_replace (string &in, const string pattern, const string with)
 {
     string::size_type at = 0;
 
-    while ((at = in.find(pattern)) != string::npos) {
+    if (pattern.empty()) {
+        return;
+    }
+
+    while ((at = in.find(pattern, at)) != string::npos) {
         in.replace(at, pattern.size(), with.c_str(), with.size());
+        at += with.size();
     }
 }
 

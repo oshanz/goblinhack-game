@@ -38,7 +38,7 @@ vector<gh_node> gh_parse::nodes;
 gh_inline void gh_parse::alloc (const uint32 size)
 {
     if (nodes.size() < size) {
-        nodes.reserve(size);
+        nodes.resize(size);
     }
 }
 

@@ -439,7 +439,7 @@ gh_parse::~gh_parse (void)
     GH_FUNCTION()
 
     if (buf) {
-        delete buf;
+        delete [] buf;
         buf = NULL;
     }
 }

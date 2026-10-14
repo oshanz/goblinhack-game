@@ -21,6 +21,7 @@
     $Id: string.cpp 276 2006-11-20 21:16:05Z goblinhack $
 */
 
+#include <stdint.h>
 #include <ghack.h>
 #include <gh_ptr.h>
 #include <gh_templates.h>
@@ -28,7 +29,7 @@
 /*
  * Code used for pointer recovery after loading an old game.
  */
-map<long, long> ptrs;
+map<uintptr_t, uintptr_t> ptrs;
 
 void reset_ptr (void)
 {
@@ -44,7 +45,7 @@ void add_ptr (void *old_ptr, void *new_ptr)
 {
     GH_FUNCTION()
 
-    ptrs[(long)old_ptr] = (long)new_ptr;
+    ptrs[(uintptr_t)old_ptr] = (uintptr_t)new_ptr;
 }
 
 //
@@ -54,10 +55,10 @@ void *get_ptr (void *old_ptr, string name)
 {
     GH_FUNCTION()
 
-    if (!ptrs[(long)old_ptr]) {
+    if (!ptrs[(uintptr_t)old_ptr]) {
         GH_THROW("cant restore pointer " + name + " " + tostring((long)old_ptr));
         return (NULL);
     }
 
-    return (void*) (ptrs[(long)old_ptr]);
+    return (void*) (ptrs[(uintptr_t)old_ptr]);
 }

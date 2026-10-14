@@ -23,7 +23,7 @@
 
 #ifndef _GH_SDL_H_
 
-#include <SDL.h>
+#include <gh_sdl_compat.h>
 
 extern void sdl_loop(void);
 extern void sdl_loop_init(void);

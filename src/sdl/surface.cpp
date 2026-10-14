@@ -32,6 +32,58 @@
 
 gh_surface::hash_surfaces gh_surface::surfaces;
 
+SDL_Window *gh_sdl_window;
+SDL_GLContext gh_sdl_glcontext;
+
+//
+// (Re)create the one and only window and its GL context.
+//
+static bool gh_sdl_create_window (const gh_size3d size, const uint32 flags)
+{
+    if (gh_sdl_glcontext) {
+        SDL_GL_DeleteContext(gh_sdl_glcontext);
+        gh_sdl_glcontext = NULL;
+    }
+
+    if (gh_sdl_window) {
+        SDL_DestroyWindow(gh_sdl_window);
+        gh_sdl_window = NULL;
+    }
+
+    uint32 wflags = SDL_WINDOW_SHOWN;
+
+    if (flags & GH_VIDEO_OPENGL) {
+        wflags |= SDL_WINDOW_OPENGL;
+    }
+
+    if (flags & GH_VIDEO_FULLSCREEN) {
+        wflags |= SDL_WINDOW_FULLSCREEN;
+    }
+
+    if (flags & GH_VIDEO_NOFRAME) {
+        wflags |= SDL_WINDOW_BORDERLESS;
+    }
+
+    gh_sdl_window = SDL_CreateWindow("Goblin Hack",
+                                     SDL_WINDOWPOS_CENTERED,
+                                     SDL_WINDOWPOS_CENTERED,
+                                     size.w, size.h, wflags);
+    if (!gh_sdl_window) {
+        return (false);
+    }
+
+    if (flags & GH_VIDEO_OPENGL) {
+        gh_sdl_glcontext = SDL_GL_CreateContext(gh_sdl_window);
+        if (!gh_sdl_glcontext) {
+            SDL_DestroyWindow(gh_sdl_window);
+            gh_sdl_window = NULL;
+            return (false);
+        }
+    }
+
+    return (true);
+}
+
 gh_surface::gh_surface (gh_size3d size, uint32 flags, enum gh_surfaceType type)
 {
     //
@@ -45,14 +97,15 @@ gh_surface::gh_surface (gh_size3d size, uint32 flags, enum gh_surfaceType type)
     // This is the primary video surface
     //
     if (type == isVideo) {
-        sdlSurface = SDL_SetVideoMode(size.w, size.h, size.d, flags);
+        sdlSurface = NULL;
+        bool ok = gh_sdl_create_window(size, flags);
 
         GH_LOG("Video screen size " +
                tostring(size.w) + "x" +
                tostring(size.h) + "x" +
                tostring(size.d));
 
-        if (sdlSurface == NULL) {
+        if (!ok) {
             GH_WARN(SDL_GetError());
             SDL_ClearError();
             gh_global::screensize = gh_size(1024, 800);
@@ -65,8 +118,8 @@ gh_surface::gh_surface (gh_size3d size, uint32 flags, enum gh_surfaceType type)
                    tostring(size.h) + "x" +
                    tostring(size.d));
 
-            sdlSurface = SDL_SetVideoMode(size.w, size.h, size.d, flags);
-            if (sdlSurface == NULL) {
+            ok = gh_sdl_create_window(size, flags);
+            if (!ok) {
                 GH_WARN(SDL_GetError());
                 SDL_ClearError();
                 gh_global::screensize = gh_size(800, 640);
@@ -78,9 +131,9 @@ gh_surface::gh_surface (gh_size3d size, uint32 flags, enum gh_surfaceType type)
                        tostring(size.h) + "x" +
                        tostring(size.d));
 
-                sdlSurface = SDL_SetVideoMode(size.w, size.h, size.d, flags);
+                ok = gh_sdl_create_window(size, flags);
 
-                if (sdlSurface == NULL) {
+                if (!ok) {
                     GH_THROW(SDL_GetError());
                 }
             }
@@ -94,17 +147,17 @@ gh_surface::gh_surface (gh_size3d size, uint32 flags, enum gh_surfaceType type)
 
         tex = 0;
 
-        if (flags & SDL_OPENGL) {
+        if (flags & GH_VIDEO_OPENGL) {
             if (openglprobe(size) != true) {
                 GH_THROW("opengl init");
             }
         }
     } else {
-        common(size, flags,
-            SDL_GetVideoSurface()->format->Rmask,
-            SDL_GetVideoSurface()->format->Gmask,
-            SDL_GetVideoSurface()->format->Bmask,
-            SDL_GetVideoSurface()->format->Amask);
+        //
+        // SDL2 has no video surface to copy the format from; use 32bit ARGB
+        //
+        size.d = 32;
+        common(size, flags, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
     }
 }
 
@@ -266,18 +319,10 @@ void gh_surface::common (gh_size3d size, uint32 flags,
     this->orig_size = this->size = size;
 
     if (!size.d) {
-        size.d = SDL_GetVideoSurface()->format->BitsPerPixel;
+        size.d = 32;
     }
 
-    if (!size.d) {
-        GH_THROW("no default depth set");
-    }
-
-    if (!flags) {
-        flags = SDL_GetVideoSurface()->flags;
-    }
-
-    sdlSurface = SDL_AllocSurface(flags, size.w, size.h, size.d,
+    sdlSurface = SDL_CreateRGBSurface(0, size.w, size.h, size.d,
         rmask, gmask, bmask, amask);
 
     if (sdlSurface == NULL) {
@@ -353,31 +398,22 @@ void gh_surface::resize (gh_size3d size, uint32 flags_new)
 
 //  bool fail = false;
 
-    SDL_Surface * sdlSurface =
-        SDL_SetVideoMode(size.w, size.h, size.d, flags_new);
+    bool ok = gh_sdl_create_window(size, flags_new);
 
     GH_LOG("New screen size " +
            tostring(size.w) + "x" +
            tostring(size.h) + "x" +
            tostring(size.d));
 
-    if (sdlSurface == NULL) {
+    if (!ok) {
         GH_THROW(SDL_GetError());
-    }
-
-    if (size.w != sdlSurface->w) {
-        GH_WARN(SDL_GetError());
-    }
-
-    if (size.h != sdlSurface->h) {
-        GH_WARN(SDL_GetError());
     }
 
     SDL_ClearError();
 
     center_window();
 
-    if (SDL_GetVideoSurface()->flags & SDL_OPENGL) {
+    if (flags_new & GH_VIDEO_OPENGL) {
         if (openglprobe(size) != true) {
             GH_THROW("opengl init");
         }
@@ -432,8 +468,9 @@ bool gh_surface::openglprobe (const gh_size3d videoSz)
         first = true;
 
 #ifdef GH_REPORT_GRAPHICS_INFO_AT_START
-        printf("  Screen                   : %d bitplanes\n",
-            SDL_GetVideoSurface()->format->BitsPerPixel);
+        int bitplanes = 0;
+        SDL_GL_GetAttribute(SDL_GL_BUFFER_SIZE, &bitplanes);
+        printf("  Screen                   : %d bitplanes\n", bitplanes);
         printf("  Vendor                   : %s\n", glGetString(GL_VENDOR));
         printf("  Renderer                 : %s\n", glGetString(GL_RENDERER));
         printf("  Version                  : %s\n", glGetString(GL_VERSION));
@@ -485,7 +522,7 @@ void gh_surface::texture (uint32 type)
 //      GH_LOG("    size " + tostring(size.w) + "x" + tostring(size.h));
 
         SDL_Surface * larger_surface = SDL_CreateRGBSurface(
-                    sdlSurface->flags,
+                    0,
                     next_pow_of_2(sdlSurface->w),
                     next_pow_of_2(sdlSurface->h),
                     sdlSurface->format->BitsPerPixel,
@@ -494,6 +531,10 @@ void gh_surface::texture (uint32 type)
                     sdlSurface->format->Bmask,
                     sdlSurface->format->Amask);
 
+        //
+        // Copy pixels as is, including alpha, rather than blending
+        //
+        SDL_SetSurfaceBlendMode(sdlSurface, SDL_BLENDMODE_NONE);
         SDL_BlitSurface(sdlSurface, NULL, larger_surface, NULL);
         SDL_FreeSurface(sdlSurface);
         sdlSurface = larger_surface;
@@ -537,37 +578,6 @@ void gh_surface::texture (uint32 type)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glEnable(GL_TEXTURE_2D);
 
-    SDL_PixelFormat o={0};
-
-    if (orig_type == GL_RGBA) {
-        o.BitsPerPixel=32;
-        o.BytesPerPixel=4;
-        o.Rloss=0;
-        o.Gloss=0;
-        o.Bloss=0;
-        o.Aloss=0;
-        o.Rshift=16;
-        o.Gshift=8;
-        o.Bshift=0;
-        o.Ashift=24;
-        o.Amask=0xff000000;
-        o.Rmask=0x00ff0000;
-        o.Gmask=0x0000ff00;
-        o.Bmask=0x000000ff;
-    } else {
-        o.BitsPerPixel=24;
-        o.BytesPerPixel=3;
-        o.Rloss=0;
-        o.Gloss=0;
-        o.Bloss=0;
-        o.Rshift=16;
-        o.Gshift=8;
-        o.Bshift=0;
-        o.Rmask=0xff0000;
-        o.Gmask=0x00ff00;
-        o.Bmask=0x0000ff;
-    }
-
     int internal_format;
 
     if (orig_type == GL_RGBA) {
@@ -579,7 +589,9 @@ void gh_surface::texture (uint32 type)
     SDL_Surface * tmp = sdlSurface;
     SDL_Surface * gl = sdlSurface;
 
-    gl = SDL_ConvertSurface(tmp, &o, 0);
+    gl = SDL_ConvertSurfaceFormat(tmp,
+        orig_type == GL_RGBA ? SDL_PIXELFORMAT_ARGB8888 :
+                               SDL_PIXELFORMAT_BGR24, 0);
 
     if (gl == NULL) {
         glDeleteTextures(1, (GLuint*) &tex);

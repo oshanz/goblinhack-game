@@ -25,11 +25,7 @@
 #include <gh_audio.h>
 //#include <gh_subsys.h>
 
-#ifdef MACOSX
 #include <SDL_mixer.h>
-#else
-#include <SDL/SDL_mixer.h>
-#endif
 
 gh_audio::hash_all_audio gh_audio::all_audio;
 

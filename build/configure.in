@@ -84,17 +84,17 @@ fi
 ################################################################################
 sdl_check()
 {
-	sdl-config --version >/dev/null 2>&1
+	sdl2-config --version >/dev/null 2>&1
 	if test "$?" != "0"; then
-		AC_MSG_RESULT(no sdl-config; go to libsdl.org)
-		sdl-config --version >/dev/null 2>&1
+		AC_MSG_RESULT(no sdl2-config; go to libsdl.org)
+		sdl2-config --version >/dev/null 2>&1
 		exit 1
 	fi
 
-	SDL_LIBS=`sdl-config --libs`
+	SDL_LIBS=`sdl2-config --libs`
 	SYSLIBS="${SYSLIBS} ${SDL_LIBS}"
 
-	SDL_FLAGS=`sdl-config --cflags`
+	SDL_FLAGS=`sdl2-config --cflags`
 	CFLAGS="${CFLAGS} ${SDL_FLAGS}"
 }
 
@@ -105,50 +105,27 @@ case "$target" in
     *-*-cygwin* | *-*-mingw32*)
         MATHLIB=""
         SYS_GL_LIBS="-lopengl32 -lglu32"
-		SYSLIBS="${SYSLIBS} -lSDL_image -lSDL_mixer"
+		SYSLIBS="${SYSLIBS} -lSDL2_image -lSDL2_mixer"
         ;;
     *-*-beos*)
         MATHLIB=""
         SYS_GL_LIBS="-lGL -lGLU"
-		SYSLIBS="${SYSLIBS} -lSDL_image -lSDL_mixer"
+		SYSLIBS="${SYSLIBS} -lSDL2_image -lSDL2_mixer"
         ;;
     *arwin* )
         MATHLIB=""
-		# This is really annoying, but the SDL frameworks for Mac OS X do not supply
-		# an sdl-cflags binary to supply these arguments, so the choices are to
-		# either hard-code the include paths (as done below), or build the SDL libs
-		# from scratch. Having done both, hard-coding is *much* better. -TT
+		# SDL2, SDL2_image and SDL2_mixer come from sdl2-config
+		# (e.g. brew install sdl2 sdl2_image sdl2_mixer)
 		CFLAGS="$CFLAGS -DMACOSX "
-
-		CFLAGS="$CFLAGS -I/Library/Frameworks/SDL.framework/Headers "
-		CFLAGS="$CFLAGS -I/Library/Frameworks/SDL.framework/Versions/A/Headers "
-		CFLAGS="$CFLAGS -I/Library/Frameworks/SDL_image.framework/Headers "
-		CFLAGS="$CFLAGS -I/Library/Frameworks/SDL_image.framework/Versions/A/Headers "
-		CFLAGS="$CFLAGS -I/Library/Frameworks/SDL_mixer.framework/Headers "
-		CFLAGS="$CFLAGS -I/Library/Frameworks/SDL_mixer.framework/Versions/A/Headers "
-		CFLAGS="$CFLAGS -I/Library/Frameworks/OpenGL.framework/Headers "
-
-		CFLAGS="$CFLAGS -I/System/Library/Frameworks/SDL.framework/Headers "
-		CFLAGS="$CFLAGS -I/System/Library/Frameworks/SDL.framework/Versions/A/Headers "
-		CFLAGS="$CFLAGS -I/System/Library/Frameworks/SDL_image.framework/Headers "
-		CFLAGS="$CFLAGS -I/System/Library/Frameworks/SDL_image.framework/Versions/A/Headers "
-		CFLAGS="$CFLAGS -I/System/Library/Frameworks/SDL_mixer.framework/Headers "
-		CFLAGS="$CFLAGS -I/System/Library/Frameworks/SDL_mixer.framework/Versions/A/Headers "
-		CFLAGS="$CFLAGS -I/System/Library/Frameworks/OpenGL.framework/Headers "
-
-		SYS_GL_LIBS="$SYS_GL_LIBS -L/System/Library/Frameworks/OpenGL.framework/Libraries"
-		SYS_GL_LIBS="$SYS_GL_LIBS -lGL -lGLU"
-		SYS_GL_LIBS="$SYS_GL_LIBS -framework SDL"
-		SYS_GL_LIBS="$SYS_GL_LIBS -framework SDL_image"
-		SYS_GL_LIBS="$SYS_GL_LIBS -framework SDL_mixer"
-		SYS_GL_LIBS="$SYS_GL_LIBS -framework OpenGL"
+		SYSLIBS="${SYSLIBS} -lSDL2_image -lSDL2_mixer"
+		SYS_GL_LIBS="-framework OpenGL"
         ;;
     *-*-aix*)
         if test x$ac_cv_prog_gcc = xyes; then
             CFLAGS="-mthreads"
         fi
         SYS_GL_LIBS=""
-		SYSLIBS="${SYSLIBS} -lSDL_image -lSDL_mixer"
+		SYSLIBS="${SYSLIBS} -lSDL2_image -lSDL2_mixer"
         ;;
     *-*-mint*)
         MATHLIB=""
@@ -161,7 +138,7 @@ case "$target" in
         else
             SYS_GL_LIBS="-lOSMesa"
         fi
-	SYSLIBS="${SYSLIBS} -lSDL_image -lSDL_mixer"
+	SYSLIBS="${SYSLIBS} -lSDL2_image -lSDL2_mixer"
 	;;
     *)
         MATHLIB="-lm"
@@ -173,7 +150,7 @@ case "$target" in
         else
             SYS_GL_LIBS="-lGL -lGLU"
         fi
-	SYSLIBS="${SYSLIBS} -lSDL_image -lSDL_mixer"
+	SYSLIBS="${SYSLIBS} -lSDL2_image -lSDL2_mixer"
         ;;
 esac
 AC_SUBST(MATHLIB)

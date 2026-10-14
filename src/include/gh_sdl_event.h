@@ -24,7 +24,7 @@
 #ifndef _GH_SDL_EVENT_H_
 #define _GH_SDL_EVENT_H_
 
-#include <SDL.h>
+#include <gh_sdl_compat.h>
 
 extern char sdl_evt_to_char(const SDL_keysym &evt);
 

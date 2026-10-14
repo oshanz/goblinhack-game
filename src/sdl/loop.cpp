@@ -69,16 +69,11 @@ void sdl_loop_init (void)
 
     gh_sdl_screen = new gh_surface(
 			      gh_global::screensize,
-			      SDL_OPENGL |
-			      (gh_global::fullscreen ? SDL_FULLSCREEN : 0) |
-			      (gh_global::noframe ? SDL_NOFRAME : 0),
+			      GH_VIDEO_OPENGL |
+			      (gh_global::fullscreen ? GH_VIDEO_FULLSCREEN : 0) |
+			      (gh_global::noframe ? GH_VIDEO_NOFRAME : 0),
 			      gh_surface::isVideo
 			      );
-    //
-    // Name our window, if it's visible.
-    //
-    SDL_WM_SetCaption("Goblin Hack", NULL);
-
     gh_surface::load_all();
 
     gh_audio::init();
@@ -294,7 +289,7 @@ void sdl_loop (void)
 	    }
 	}
 
-	SDL_GL_SwapBuffers();
+	gh_sdl_swap_buffers();
 
 	//
 	// Step through the list of delays that we have

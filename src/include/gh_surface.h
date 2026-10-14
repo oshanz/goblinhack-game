@@ -27,13 +27,9 @@
 #if defined WIN32 || defined __CYGWIN__
 #include <windows.h>
 #endif
-#include <SDL.h>
+#include <gh_sdl_compat.h>
 
-#ifdef MACOSX
 #include <SDL_image.h>
-#else
-#include <SDL/SDL_image.h>
-#endif
 
 #include <gh_pixel.h>
 #include <gh_getput_pixel.h>

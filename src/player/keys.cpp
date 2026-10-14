@@ -63,7 +63,7 @@ int gh_player::key_held (const SDL_keysym & sym)
     }
 
     switch (sym.sym) {
-    case SDLK_KP7:
+    case SDLK_KP_7:
         if (!thing->speed) {
             thing->speed = 1;
             thing->direction = gh_point3d(0,0,0);
@@ -73,7 +73,7 @@ int gh_player::key_held (const SDL_keysym & sym)
         thing->update_anim();
         break;
 
-    case SDLK_KP9:
+    case SDLK_KP_9:
         if (!thing->speed) {
             thing->speed = 1;
             thing->direction = gh_point3d(0,0,0);
@@ -83,7 +83,7 @@ int gh_player::key_held (const SDL_keysym & sym)
         thing->update_anim();
         break;
 
-    case SDLK_KP1:
+    case SDLK_KP_1:
         if (!thing->speed) {
             thing->speed = 1;
             thing->direction = gh_point3d(0,0,0);
@@ -93,7 +93,7 @@ int gh_player::key_held (const SDL_keysym & sym)
         thing->update_anim();
         break;
 
-    case SDLK_KP3:
+    case SDLK_KP_3:
         if (!thing->speed) {
             thing->speed = 1;
             thing->direction = gh_point3d(0,0,0);
@@ -103,7 +103,7 @@ int gh_player::key_held (const SDL_keysym & sym)
         thing->update_anim();
         break;
 
-    case SDLK_KP4:
+    case SDLK_KP_4:
     case SDLK_LEFT:
         if (!thing->speed) {
             thing->speed = 1;
@@ -113,7 +113,7 @@ int gh_player::key_held (const SDL_keysym & sym)
         thing->update_anim();
         break;
 
-    case SDLK_KP6:
+    case SDLK_KP_6:
     case SDLK_RIGHT:
         if (!thing->speed) {
             thing->speed = 1;
@@ -123,7 +123,7 @@ int gh_player::key_held (const SDL_keysym & sym)
         thing->update_anim();
         break;
 
-    case SDLK_KP8:
+    case SDLK_KP_8:
     case SDLK_UP:
         if (!thing->speed) {
             thing->speed = 1;
@@ -133,7 +133,7 @@ int gh_player::key_held (const SDL_keysym & sym)
         thing->update_anim();
         break;
 
-    case SDLK_KP2:
+    case SDLK_KP_2:
     case SDLK_DOWN:
         if (!thing->speed) {
             thing->speed = 1;
@@ -220,17 +220,17 @@ int gh_player::key_down (const SDL_keysym & sym)
     }
 
     switch (sym.sym) {
-    case SDLK_KP7:
-    case SDLK_KP9:
-    case SDLK_KP1:
-    case SDLK_KP3:
-    case SDLK_KP4:
+    case SDLK_KP_7:
+    case SDLK_KP_9:
+    case SDLK_KP_1:
+    case SDLK_KP_3:
+    case SDLK_KP_4:
     case SDLK_LEFT:
-    case SDLK_KP6:
+    case SDLK_KP_6:
     case SDLK_RIGHT:
-    case SDLK_KP8:
+    case SDLK_KP_8:
     case SDLK_UP:
-    case SDLK_KP2:
+    case SDLK_KP_2:
     case SDLK_DOWN:
         return (key_held(sym));
 
@@ -485,49 +485,49 @@ int gh_player::key_up (const SDL_keysym & sym)
     }
 
     switch (sym.sym) {
-    case SDLK_KP7:
+    case SDLK_KP_7:
         thing->direction_wanted.x = 0;
         thing->direction_wanted.y = 0;
         thing->update_anim();
         break;
 
-    case SDLK_KP9:
+    case SDLK_KP_9:
         thing->direction_wanted.x = 0;
         thing->direction_wanted.y = 0;
         thing->update_anim();
         break;
 
-    case SDLK_KP1:
+    case SDLK_KP_1:
         thing->direction_wanted.x = 0;
         thing->direction_wanted.y = 0;
         thing->update_anim();
         break;
 
-    case SDLK_KP3:
+    case SDLK_KP_3:
         thing->direction_wanted.x = 0;
         thing->direction_wanted.y = 0;
         thing->update_anim();
         break;
 
-    case SDLK_KP4:
+    case SDLK_KP_4:
     case SDLK_LEFT:
         thing->direction_wanted.x = 0;
         thing->update_anim();
         break;
 
-    case SDLK_KP6:
+    case SDLK_KP_6:
     case SDLK_RIGHT:
         thing->direction_wanted.x = 0;
         thing->update_anim();
         break;
 
-    case SDLK_KP8:
+    case SDLK_KP_8:
     case SDLK_UP:
         thing->direction_wanted.y = 0;
         thing->update_anim();
         break;
 
-    case SDLK_KP2:
+    case SDLK_KP_2:
     case SDLK_DOWN:
         thing->direction_wanted.y = 0;
         thing->update_anim();
@@ -583,45 +583,45 @@ int gh_player::editing_key_held (const SDL_keysym & sym)
     }
 
     switch (sym.sym) {
-    case SDLK_KP7:
+    case SDLK_KP_7:
         thing->speed = l->is_editing_grid_res;
         mouse_movement(gh_point(-thing->speed, -thing->speed), gh_point(0,0));
         break;
 
-    case SDLK_KP9:
+    case SDLK_KP_9:
         thing->speed = l->is_editing_grid_res;
         mouse_movement(gh_point(thing->speed, -thing->speed), gh_point(0,0));
         break;
 
-    case SDLK_KP1:
+    case SDLK_KP_1:
         thing->speed = l->is_editing_grid_res;
         mouse_movement(gh_point(-thing->speed, thing->speed), gh_point(0,0));
         break;
 
-    case SDLK_KP3:
+    case SDLK_KP_3:
         thing->speed = l->is_editing_grid_res;
         mouse_movement(gh_point(thing->speed, thing->speed), gh_point(0,0));
         break;
 
-    case SDLK_KP4:
+    case SDLK_KP_4:
     case SDLK_LEFT:
         thing->speed = l->is_editing_grid_res;
         mouse_movement(gh_point(-thing->speed, 0), gh_point(0,0));
         break;
 
-    case SDLK_KP6:
+    case SDLK_KP_6:
     case SDLK_RIGHT:
         thing->speed = l->is_editing_grid_res;
         mouse_movement(gh_point(thing->speed, 0), gh_point(0,0));
         break;
 
-    case SDLK_KP8:
+    case SDLK_KP_8:
     case SDLK_UP:
         thing->speed = l->is_editing_grid_res;
         mouse_movement(gh_point(0, -thing->speed), gh_point(0,0));
         break;
 
-    case SDLK_KP2:
+    case SDLK_KP_2:
     case SDLK_DOWN:
         thing->speed = l->is_editing_grid_res;
         mouse_movement(gh_point(0, thing->speed), gh_point(0,0));
@@ -837,7 +837,7 @@ int gh_player::editing_key_down (const SDL_keysym & sym)
                     l->cursor_at.x = l->map.hero_at.x;
                     l->cursor_at.y = l->map.hero_at.y;
 
-                    SDL_WM_GrabInput(SDL_GRAB_ON);
+                    gh_sdl_grab_input(true);
 
                     myscreen.auto_repeat_rate = 10;
                     myscreen.auto_repeat_delay = 5;
@@ -946,17 +946,17 @@ int gh_player::editing_key_down (const SDL_keysym & sym)
     }
 
     switch (sym.sym) {
-    case SDLK_KP7:
-    case SDLK_KP9:
-    case SDLK_KP1:
-    case SDLK_KP3:
-    case SDLK_KP4:
+    case SDLK_KP_7:
+    case SDLK_KP_9:
+    case SDLK_KP_1:
+    case SDLK_KP_3:
+    case SDLK_KP_4:
     case SDLK_LEFT:
-    case SDLK_KP6:
+    case SDLK_KP_6:
     case SDLK_RIGHT:
-    case SDLK_KP8:
+    case SDLK_KP_8:
     case SDLK_UP:
-    case SDLK_KP2:
+    case SDLK_KP_2:
     case SDLK_DOWN:
         return (editing_key_held(sym));
 

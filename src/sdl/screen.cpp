@@ -151,7 +151,7 @@ static void init_screen (gh_screen * screen)
     MY_CALLBACK(screen, init)();
 }
 
-static int FilterEvents (const SDL_Event *event)
+static int FilterEvents (void *userdata, SDL_Event *event)
 {
     GH_FUNCTION()
 
@@ -185,12 +185,12 @@ static void read_events (void)
 
         SDL_Delay(6);
 
+    //
+    // Key down, key up and the mouse button and motion events; the event
+    // filter has already thrown away everything else.
+    //
     found = SDL_PeepEvents(events, GH_ARRAY_SIZE(events), SDL_GETEVENT,
-                    SDL_MOUSEMOTIONMASK|
-                    SDL_MOUSEBUTTONDOWNMASK|
-                    SDL_MOUSEBUTTONUPMASK|
-                    SDL_KEYDOWNMASK|
-                    SDL_KEYUPMASK);
+                    SDL_KEYDOWN, SDL_MOUSEBUTTONUP);
 
     //
     // Update the count of held mouse buttons, and for how long
@@ -263,6 +263,13 @@ static void read_events (void)
                 SDLMod mod = key->mod;
 
                 //
+                // SDL2 sends auto repeats; we do our own.
+                //
+                if (e->key.repeat) {
+                    break;
+                }
+
+                //
                 // If the numpad is screwing with us picking up events
                 // like shift key presses, filter it out
                 //
@@ -272,10 +279,12 @@ static void read_events (void)
                 }
 
                 if (key->sym == SDLK_LALT) {
+                    e++;
                     continue;
                 }
 
                 if (key->sym == SDLK_RALT) {
+                    e++;
                     continue;
                 }
 
@@ -326,9 +335,9 @@ static void read_events (void)
                             SDL_ShowCursor(gh_global::mouse_visible);
 
                             if (gh_global::mouse_visible == false) {
-                                SDL_WM_GrabInput(SDL_GRAB_ON);
+                                gh_sdl_grab_input(true);
                             } else {
-                                SDL_WM_GrabInput(SDL_GRAB_OFF);
+                                gh_sdl_grab_input(false);
                             }
                             e++;
                             continue;
@@ -349,7 +358,7 @@ void gh_screen::start_threads (void)
 {
     GH_FUNCTION()
 
-    SDL_SetEventFilter(FilterEvents);
+    SDL_SetEventFilter(FilterEvents, NULL);
 }
 
 void gh_screen::exit (void)
@@ -481,8 +490,11 @@ void gh_screen::display_all (void)
 {
     GH_FUNCTION()
 
-    gh_screen::vid.w = SDL_GetVideoSurface()->w;
-    gh_screen::vid.h = SDL_GetVideoSurface()->h;
+    int vid_w = 0;
+    int vid_h = 0;
+    SDL_GetWindowSize(gh_sdl_window, &vid_w, &vid_h);
+    gh_screen::vid.w = vid_w;
+    gh_screen::vid.h = vid_h;
 
     vector<class gh_screen *>::iterator i = screens.begin();
 

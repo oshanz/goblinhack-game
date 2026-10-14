@@ -57,7 +57,7 @@ void gh_player::enter_level_editor (void)
     level->cursor_at.x = level->map.hero_at.x;
     level->cursor_at.y = level->map.hero_at.y;
 
-    SDL_WM_GrabInput(SDL_GRAB_ON);
+    gh_sdl_grab_input(true);
 
     level->game->delete_all_messages();
 
@@ -82,7 +82,7 @@ void gh_player::exit_level_editor (void)
     level->cursor_at.x = level->map.hero_at.x;
     level->cursor_at.y = level->map.hero_at.y;
 
-    SDL_WM_GrabInput(SDL_GRAB_OFF);
+    gh_sdl_grab_input(false);
 
     myscreen.auto_repeat_rate = 1;
     myscreen.auto_repeat_delay = 5;
@@ -142,7 +142,7 @@ gh_level *gh_player::new_level_editor (void)
     game->delete_all_messages();
     game->replace_last_message("New level");
 
-    SDL_WM_GrabInput(SDL_GRAB_ON);
+    gh_sdl_grab_input(true);
 
     myscreen.auto_repeat_rate = 10;
     myscreen.auto_repeat_delay = 5;

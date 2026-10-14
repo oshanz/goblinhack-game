@@ -592,7 +592,7 @@ void gh_thing::render_cached (const int frame,
 
 #ifdef DEBUG_RENDER
     blit_quad(gh_fpoint3d(0,0,0), tex_w, tex_h);
-    SDL_GL_SwapBuffers();
+    gh_sdl_swap_buffers();
     SDL_Delay(10);
 #endif
 
@@ -708,7 +708,7 @@ void gh_thing::render_cached_all (void)
 
         glClear(GL_COLOR_BUFFER_BIT);   
         gh_term_refresh();
-        SDL_GL_SwapBuffers();
+        gh_sdl_swap_buffers();
     }
 
     //

@@ -69,7 +69,7 @@ void gh_collage::process (void)
 		     " size=" + tostring(pixel_size.w) + "x" + tostring(pixel_size.h) +
 		     " only have " +
 		     tostring(surface->orig_size.w) + "x" + tostring(surface->orig_size.h) +
-		     " pixels")
+		     " pixels");
 	}
 
 	if (tiles.h > surface->size.h) {
@@ -78,7 +78,7 @@ void gh_collage::process (void)
 		     " size=" + tostring(pixel_size.w) + "x" + tostring(pixel_size.h) +
 		     " only have " +
 		     tostring(surface->orig_size.w) + "x" + tostring(surface->orig_size.h) +
-		     " pixels")
+		     " pixels");
 	}
     }
 
@@ -99,7 +99,7 @@ void gh_collage::process (void)
 		 " size=" + tostring(pixel_size.w) + "x" + tostring(pixel_size.h) +
 		 " only have " +
 		 tostring(surface->orig_size.w) + "x" + tostring(surface->orig_size.h) +
-		 " pixels")
+		 " pixels");
     }
 
     //

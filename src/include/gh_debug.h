@@ -24,13 +24,13 @@
 #ifndef _GH_DEBUG_H_
 #define _GH_DEBUG_H_
 
-#define GH_WARN(msg) {\
+#define GH_WARN(msg) do {\
     cout << endl << "** Warning ** " << __FILE__ << "(" << __LINE__ << ")::" << __FUNCTION__ <<\
         "() " << msg << endl;\
     cerr << endl << "** Warning ** " << __FILE__ << "(" << __LINE__ << ")::" << __FUNCTION__ <<\
         "() " << msg << endl;\
     gh_backtrace();\
-}
+} while (0)
 
 extern void GH_LOG(string);
 extern void GH_ROOM_LOG(void *, string);
@@ -61,7 +61,7 @@ public:
     ~gh_log () { gh_log_indent_depth--; }
 };
 
-#define GH_THROW(msg) {\
+#define GH_THROW(msg) do {\
     if (msg != string("")) {\
         cout << endl << "** Error ** " << __FILE__ << "(" << __LINE__ << ")::" << __FUNCTION__ <<\
             "() " << msg << endl;\
@@ -75,9 +75,9 @@ public:
             "() " << endl;\
     } \
     throw invalid_argument (string(msg));\
-}
+} while (0)
 
-#define GH_ERR(msg) {\
+#define GH_ERR(msg) do {\
     if (msg != string("")) {\
         cout << endl << "** Error ** " << __FILE__ << "(" << __LINE__ << ")::" << __FUNCTION__ <<\
             "() " << msg << endl;\
@@ -90,7 +90,7 @@ public:
         cerr << endl << "** Error ** " << __FILE__ << "(" << __LINE__ << ")::" << __FUNCTION__ <<\
             "() " << endl;\
     } \
-}
+} while (0)
 
 #define GH_EXIT(msg) {\
     cout << endl << "** Bail-out ** " << __FILE__ << "(" << __LINE__ << ")::" << __FUNCTION__ <<\

@@ -62,6 +62,11 @@ void sdl_loop_init (void)
 
     gh_global::sdl_initted = true;
 
+    //
+    // Only queue keyboard, mouse and quit events
+    //
+    gh_screen::start_threads();
+
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER,1);
 
     gh_global::fullscreen = false;

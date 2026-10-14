@@ -24,6 +24,7 @@
 #include <ghack.h>
 #include <gh_global.h>
 #include <gh_screen.h>
+#include <gh_main.h>
 #include <gh_templates.h>
 
 gh_size gh_screen::vid;
@@ -156,9 +157,10 @@ static int FilterEvents (void *userdata, SDL_Event *event)
     GH_FUNCTION()
 
     switch (event->type) {
-        /* This is important!  Queue it if we want to quit. */
+        /* Cmd+Q / window close: let the main loop shut down cleanly. */
         case SDL_QUIT:
-            return(1);
+            gh_quit_requested = 1;
+            return(0);
 
         /* Mouse and keyboard events go to threads */
         case SDL_MOUSEMOTION:

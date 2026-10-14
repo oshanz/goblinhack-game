@@ -173,6 +173,7 @@ int gh_main_thread (void *unused)
 	    }
 
 	    delete game;
+	    game = NULL;
 
 	    if (gh_global::config_changed) {
 		GH_LOG("");
@@ -200,15 +201,18 @@ int gh_main_thread (void *unused)
 	// Lets make sure the player does not exist. We just want to
 	// save settings here.
 	//
-	if (game->player) {
-	    GH_WARN("Player still exists at game exit?");
+	if (game) {
+	    if (game->player) {
+		GH_WARN("Player still exists at game exit?");
+	    }
+
+	    game->player = NULL;
+
+	    gh_write_file(game, "", "game.gz");
+
+	    delete game;
+	    game = NULL;
 	}
-
-	game->player = NULL;
-
-	gh_write_file(game, "", "game.gz");
-
-	delete game;
 
     } catch (exception &e) {
 	GH_LOG("");

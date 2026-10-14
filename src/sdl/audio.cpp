@@ -78,6 +78,11 @@ gh_audio::~gh_audio (void)
     if (channel) {
         Mix_HaltChannel(channel);
     }
+
+    if (audio) {
+        Mix_FreeChunk((Mix_Chunk*)audio);
+        audio = NULL;
+    }
 }
 
 //

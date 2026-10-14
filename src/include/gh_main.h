@@ -26,7 +26,9 @@
 
 extern void gh_start_thread(void);
 extern int gh_main_thread(void *unused);
+#include <signal.h>
 extern void gh_main_installer(void);
+extern volatile sig_atomic_t gh_quit_requested;
 extern void gh_main_restart(void);
 
 #endif /* _GH_SYS_H_ */

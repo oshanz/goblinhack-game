@@ -31,6 +31,7 @@
 #include <gh_math.h>
 #include <gh_audio.h>
 #include <gh_music.h>
+#include <gh_main.h>
 
 gh_surface *gh_sdl_screen;
 
@@ -134,6 +135,12 @@ void sdl_loop (void)
     gh_global::done = false;
 
     while (!gh_global::done) {
+
+	if (gh_quit_requested) {
+	    SDL_Quit();
+	    GH_LOG("Exit(ctrl-c)");
+	    exit(1);
+	}
 
 	//
 	// Clear The Screen And The Depth Buffer

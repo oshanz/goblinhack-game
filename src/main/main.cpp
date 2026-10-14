@@ -42,15 +42,15 @@
 #include <stdlib.h>     /* General Utilities */
 #endif
 
+//
+// Only set a flag here; anything else is not async-signal-safe. The main
+// loop (sdl_loop) notices the flag and exits cleanly.
+//
+volatile sig_atomic_t gh_quit_requested = 0;
+
 void gh_ctrlc (int arg)
 {
-    GH_FUNCTION()
-
-    SDL_Quit();
-
-    GH_LOG("Exit(ctrl-c)");
-
-    exit(1);
+    gh_quit_requested = 1;
 }
 
 int main (int argc, char *argv[]) 

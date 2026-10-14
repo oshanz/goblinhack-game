@@ -107,29 +107,25 @@ template <class C>
 template <class C>
 
     //
-    // Warning O(n^2)
+    // Warning O(n^2). Keeps the last of each run of equal elements.
     //
     void erase_dups (C &c)
     {
-        for (;;) {
-        redo:
-            typename C::iterator i = c.begin();
-            while (i != c.end()) {
-
-                typename C::iterator j = c.begin();
-                while (j != c.end()) {
-
-                    if (i != j) {
-                        if (*i == *j) {
-                            c.erase(i);
-                            goto redo;
-                        }
-                    }
-                    j++;
+        typename C::iterator i = c.begin();
+        while (i != c.end()) {
+            typename C::iterator j = i;
+            bool dup = false;
+            for (++j; j != c.end(); ++j) {
+                if (*i == *j) {
+                    dup = true;
+                    break;
                 }
-                i++;
             }
-            break;
+            if (dup) {
+                i = c.erase(i);
+            } else {
+                ++i;
+            }
         }
     }
 

@@ -1,0 +1,33 @@
+# syntax=docker/dockerfile:1
+#
+# Build the Linux release binary against an old glibc so it runs on current
+# distributions. Used by build/sh/release-linux.sh, with a checkout of the
+# release commit as the build context:
+#
+#   docker build -f build/docker/Dockerfile.linux --target out \
+#       --output type=local,dest=out <source-dir>
+#
+# The dependency layer is cached until this file changes, and the build layer
+# is cached until the source changes.
+
+ARG BASE_IMAGE=ubuntu:22.04
+
+FROM ${BASE_IMAGE} AS deps
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update -qq && \
+    apt-get install -y -qq --no-install-recommends \
+        g++ make autoconf automake xutils-dev pkg-config ca-certificates \
+        libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev \
+        libgl1-mesa-dev libglu1-mesa-dev zlib1g-dev && \
+    rm -rf /var/lib/apt/lists/*
+
+FROM deps AS build
+WORKDIR /build
+COPY . .
+RUN ./RUNME -n && \
+    (make depend 2>/dev/null || true) && \
+    make all
+
+# Only the binary, so --output writes just that
+FROM scratch AS out
+COPY --from=build /build/src/ghack /ghack

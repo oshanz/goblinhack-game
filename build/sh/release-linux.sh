@@ -81,11 +81,7 @@ if [ $UPLOAD -eq 1 ]; then
 fi
 
 WORK=$(mktemp -d)
-cleanup() {
-    # container builds leave root-owned files behind if they were interrupted
-    rm -rf "$WORK" 2>/dev/null || true
-}
-trap cleanup EXIT
+trap 'rm -rf "$WORK"' EXIT
 
 # Always build from the committed tree, not from whatever is lying around
 log "Exporting $REF ($(git rev-parse --short "$REF^{commit}"))"
@@ -104,22 +100,14 @@ if [ $LOCAL -eq 1 ]; then
 else
     command -v docker >/dev/null || die "docker is not installed; use --local"
     log "Building in $IMAGE"
-    docker run --rm \
-        -v "$WORK/src:/build" -v "$WORK/out:/out" -w /build \
-        -e HOST_UID="$(id -u)" -e HOST_GID="$(id -g)" \
-        "$IMAGE" bash -euo pipefail -c '
-            export DEBIAN_FRONTEND=noninteractive
-            apt-get update -qq
-            apt-get install -y -qq --no-install-recommends \
-                g++ make autoconf automake xutils-dev pkg-config ca-certificates \
-                libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev \
-                libgl1-mesa-dev libglu1-mesa-dev zlib1g-dev >/dev/null
-            ./RUNME -n
-            make depend 2>/dev/null || true
-            make all
-            cp src/ghack /out/ghack
-            chown -R "$HOST_UID:$HOST_GID" /build /out
-        '
+    # The dependency layer is cached by docker, and so is the compile when the
+    # source has not changed. The Dockerfile comes from the working tree since
+    # an older release tag may not have one.
+    DOCKER_BUILDKIT=1 docker build \
+        -f "$TOP/build/docker/Dockerfile.linux" \
+        --build-arg "BASE_IMAGE=$IMAGE" \
+        --target out --output "type=local,dest=$WORK/out" \
+        "$WORK/src"
 fi
 
 [ -x "$WORK/out/ghack" ] || die "build did not produce a ghack binary"

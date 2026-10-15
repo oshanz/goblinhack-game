@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-GoblinHack: a 2D smooth-scrolling ASCII roguelike in C++ (~72k LOC) on SDL 1.2 + OpenGL. No longer actively developed upstream; the goal is to keep it compiling on current Ubuntu/Linux. Version lives in `build/etc/VERSION`. There is no test suite or linter (`src/test/` only holds a fractal demo program).
+GoblinHack: a 2D smooth-scrolling ASCII roguelike in C++ (~72k LOC) on SDL2 + OpenGL (ported from SDL 1.2; the 1.2 build is no longer supported). No longer actively developed upstream; the goal is to keep it compiling on current Ubuntu/Linux. Version lives in `build/etc/VERSION`. There is no test suite or linter (`src/test/` only holds a fractal demo program).
 
 ## Build and run
 
@@ -14,7 +14,7 @@ Autoconf + recursive hand-written makefiles, driven by `./RUNME`:
 - `./RUNME -n` — configure only, no make.
 - After configure, incremental builds: `make` at top level (or `cd src/<module> && make`). Binary is `src/ghack`.
 - `make depend` uses `makedepend` (`build/sh/makedep.sh`); `make clean` also deletes `src/resources/game.gz`, saved games and hiscores; `make clobber` removes generated config.
-- Deps: g++, autoconf, makedepend, libsdl1.2-dev, libsdl-mixer1.2-dev, libsdl-image1.2-dev, libsdl-net1.2-dev.
+- Deps: g++, autoconf, makedepend, libsdl2-dev, libsdl2-image-dev, libsdl2-mixer-dev, libgl1-mesa-dev, libglu1-mesa-dev (macOS: `brew install autoconf automake makedepend sdl2 sdl2_image sdl2_mixer`). `build/configure.in` finds SDL via `sdl2-config`.
 - Run `./ghack` from the repo root (it reads `src/resources/...` relative to the working dir). It redirects stdout/stderr to `stdout.txt`/`stderr.txt`; check those for crashes (`bin/traceback` helps decode backtraces). Flags: `-f/--fullscreen`, `-w/--window`, `-h`.
 
 Generated/untracked files (`Makefile`, `build/mk/{config,library,program,rules}`, `*.o`, `configure`, `README`, `ghack`) are build artifacts; the tracked sources are the `*.in` templates. Edit `Makefile.in`, not `Makefile`.
@@ -29,6 +29,7 @@ Key points that span files:
 - **`gh_thing` is the central entity** (`src/include/gh_thing.h`, ~2000 lines; implementation split across the many files in `src/things/`, each one a facet: attack, hit, bravery, the various `*_proof.cpp`, followers, etc.). Players, monsters, items, doors and walls are all things.
 - **Data-driven content.** Things, rooms and levels are defined as text files under `src/resources/things/<category>/...`, `src/resources/rooms`, `src/resources/levels`, parsed by `gh_parse`/`gh_stream` (`src/io/io.cpp`, `gh_stream.h`) and loaded zipped/gz'd. Adding a monster is mostly a new resource directory, not code. Serialization of game state also goes through `gh_stream` (`gh_write_file(game, "", "game.gz")`, `src/game/save.cpp`/`load.cpp`).
 - **Startup flow** (`src/main/main.cpp`): installer check/update, redirect stdio, parse args, load config (`gh_global`), then loop through UI choosers (`src/ui/`) into the game loop (`src/game/loop.cpp`, `src/player/loop.cpp`). On quit the game state is written to `game.gz`.
+- **SDL2 compat layer.** `src/include/gh_sdl_compat.h` aliases SDL 1.2 names (`SDL_keysym`, `SDLMod`) and holds the single window/GL context plus `gh_sdl_swap_buffers()` / `gh_sdl_grab_input()`. Input flows: SDL event filter (`FilterEvents` in `src/sdl/screen.cpp`, drops everything except quit/key/mouse) -> `read_events` -> per-screen `key_down`/`key_up`/`key_held` callbacks, with the game doing its own key auto-repeat. Text input is deliberately disabled (`SDL_StopTextInput()` in `src/sdl/surface.cpp`); otherwise on Linux an IME turns keys into `SDL_TEXTINPUT` events that the filter drops and the game gets no key presses. Don't re-enable it globally.
 - Instrumentation macros `GH_FUNCTION()`, `GH_LOG()`, `GH_THROW()` and custom allocation tracking (`src/debug/dmalloc.cpp`) are used throughout; follow that style in new code.
 - Windows support is retained (`src/*.dll`, `installer/*.nsi`, `contrib/mingw`).
 

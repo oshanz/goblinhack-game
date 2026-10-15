@@ -33,3 +33,6 @@ stderr.txt
 hiscore*.gz
 *.bin
 /installer/*.tgz
+
+# release tarballs
+/dist/

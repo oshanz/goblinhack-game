@@ -72,6 +72,13 @@ static bool gh_sdl_create_window (const gh_size3d size, const uint32 flags)
         return (false);
     }
 
+    //
+    // SDL2 enables text input by default on desktops. On Linux an input
+    // method (ibus/fcitx) then turns key presses into text events and the
+    // game never sees SDL_KEYDOWN/SDL_KEYUP. We only want raw key events.
+    //
+    SDL_StopTextInput();
+
     if (flags & GH_VIDEO_OPENGL) {
         gh_sdl_glcontext = SDL_GL_CreateContext(gh_sdl_window);
         if (!gh_sdl_glcontext) {

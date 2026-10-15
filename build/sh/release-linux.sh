@@ -16,7 +16,9 @@
 # for other machines.
 #
 # The version comes from build/etc/VERSION and the release tag is v<version>.
-# The release notes are the matching section of CHANGELOG.md.
+# If that tag already exists the release is built from the tag, otherwise from
+# HEAD, which is then tagged. The release notes are the matching section of
+# CHANGELOG.md.
 #
 set -euo pipefail
 
@@ -53,10 +55,19 @@ NAME=goblinhack-$VERSION-linux-$ARCH
 DIST=$TOP/dist
 TARBALL=$DIST/$NAME.tar.gz
 
+# Build from the release tag if it exists, so a rebuild always ships exactly
+# the tagged code. Otherwise build HEAD and tag it once the build succeeds.
+if git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
+    REF=$TAG
+else
+    REF=HEAD
+fi
+
 # git tracks the version header, so make sure it matches VERSION before building
-HEADER_VERSION=$(sed -n 's/^#define GH_VERSION "\(.*\)"/\1/p' src/include/gh_version.h)
+HEADER_VERSION=$(git show "$REF:src/include/gh_version.h" |
+    sed -n 's/^#define GH_VERSION "\(.*\)"/\1/p')
 [ "$HEADER_VERSION" = "$VERSION" ] ||
-    die "src/include/gh_version.h says $HEADER_VERSION but VERSION says $VERSION; run ./RUNME -n"
+    die "src/include/gh_version.h at $REF says $HEADER_VERSION but VERSION says $VERSION; run ./RUNME -n"
 
 if [ $UPLOAD -eq 1 ]; then
     command -v gh >/dev/null || die "gh is not installed"
@@ -66,11 +77,7 @@ if [ $UPLOAD -eq 1 ]; then
         REPO=$(git remote get-url origin | sed -E 's#^(git@github.com:|https://github.com/)##; s#\.git$##')
     fi
     git fetch -q origin
-    [ -n "$(git branch -r --contains HEAD)" ] || die "HEAD is not pushed; run: git push"
-    if git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
-        [ "$(git rev-parse "$TAG^{commit}")" = "$(git rev-parse HEAD)" ] ||
-            die "tag $TAG already exists on a different commit than HEAD"
-    fi
+    [ -n "$(git branch -r --contains "$REF")" ] || die "$REF is not pushed; run: git push"
 fi
 
 WORK=$(mktemp -d)
@@ -81,9 +88,9 @@ cleanup() {
 trap cleanup EXIT
 
 # Always build from the committed tree, not from whatever is lying around
-log "Exporting HEAD ($(git rev-parse --short HEAD))"
+log "Exporting $REF ($(git rev-parse --short "$REF^{commit}"))"
 mkdir "$WORK/src" "$WORK/out"
-git archive HEAD | tar -x -C "$WORK/src"
+git archive "$REF" | tar -x -C "$WORK/src"
 
 if [ $LOCAL -eq 1 ]; then
     log "Building on the host"
@@ -121,10 +128,10 @@ strip "$WORK/out/ghack"
 log "Packaging $NAME"
 PKG=$WORK/pkg/$NAME
 mkdir -p "$PKG"
-git archive HEAD src/resources | tar -x -C "$PKG"
+git archive "$REF" src/resources | tar -x -C "$PKG"
 find "$PKG" -name 'Makefile*' -delete
 cp "$WORK/out/ghack" "$PKG/ghack"
-cp LICENSE README.md CHANGELOG.md "$PKG/"
+cp "$WORK/src/LICENSE" "$WORK/src/README.md" "$WORK/src/CHANGELOG.md" "$PKG/"
 
 mkdir -p "$DIST"
 tar -C "$WORK/pkg" -czf "$TARBALL" "$NAME"
@@ -160,11 +167,11 @@ NOTES=$WORK/notes.md
 awk -v v="$VERSION" '
     /^## / { if (on) exit; if ($2 == v) { on = 1; next } }
     on
-' CHANGELOG.md > "$NOTES"
+' "$WORK/src/CHANGELOG.md" > "$NOTES"
 [ -s "$NOTES" ] || die "CHANGELOG.md has no '## $VERSION' section"
 printf '\nSee [CHANGELOG.md](CHANGELOG.md) for the full history.\n' >> "$NOTES"
 
-if ! git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
+if [ "$REF" = HEAD ]; then
     log "Tagging $TAG"
     git tag -a "$TAG" -m "GoblinHack $VERSION"
 fi

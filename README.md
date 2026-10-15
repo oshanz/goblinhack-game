@@ -11,6 +11,20 @@ A 2d smooth scrolling ascii dungeon romp
 
 This game is no longer actively developed, but I try to keep it compiling.
 
+## Running the macOS release
+
+The macOS release is ad-hoc signed but not notarized, so Gatekeeper reports "Apple could not verify "ghack" is free of malware" on first launch. Clear the quarantine flag on the extracted folder, then run the game:
+
+    tar xzf goblinhack-2.0-macos-arm64.tar.gz
+    xattr -dr com.apple.quarantine goblinhack-2.0-macos-arm64
+    cd goblinhack-2.0-macos-arm64 && ./ghack
+
+Alternatives:
+
+- If it is already blocked, open System Settings > Privacy & Security and click "Open Anyway" next to the ghack message. The bundled `lib/*.dylib` files may need the same, so the `xattr` command is simpler.
+- Double clicking `GoblinHack.command` clears the flag on the rest of the folder, but the first launch needs right click > Open because the `.command` file is quarantined too.
+- Downloading with `curl` or `gh release download` does not set the quarantine flag.
+
 ## Building
 
 Needs a C++ compiler, `autoconf`, `makedepend`, SDL2, SDL2_image, SDL2_mixer and OpenGL. Tested on macOS (Apple Silicon) and openSUSE Tumbleweed; Ubuntu and Windows are untested with SDL2.

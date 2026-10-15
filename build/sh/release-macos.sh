@@ -201,7 +201,12 @@ tar -C "$CHECK" -xzf "$TARBALL"
     cd "$CHECK/$NAME"
     env -i HOME="$HOME" PATH=/usr/bin:/bin ./ghack -w >/dev/null 2>&1 &
     pid=$!
-    sleep 10
+    # first launch of freshly signed binaries can be slow, so wait up to 20 seconds
+    for _ in $(seq 20); do
+        grep -q 'Starting game loop' stdout.txt 2>/dev/null && break
+        kill -0 "$pid" 2>/dev/null || break
+        sleep 1
+    done
     kill "$pid" 2>/dev/null || true
     wait "$pid" 2>/dev/null || true
 )

@@ -9,14 +9,16 @@
 
 A 2d smooth scrolling ascii dungeon romp
 
-> **This is a fork** of Neil McGill's GoblinHack
-> (https://github.com/goblinhack/goblinhack-game), kept building on current
-> Linux and macOS with SDL2 fixes, build scripts and release packaging. No
-> gameplay changes; all credit goes to the original author.
->
-> Thank you, Neil, for a game that took me back to a particular time in my
-> life and made me want to play it again. May it keep working for anyone
-> else who wants to revisit it too.
+## About this fork
+
+This is a fork of Neil McGill's GoblinHack
+(https://github.com/goblinhack/goblinhack-game), kept building on current
+Linux and macOS with SDL2 fixes, build scripts and release packaging. No
+gameplay changes; all credit goes to the original author.
+
+**Thank you, Neil**, for a game that took me back to a particular time in my
+life and made me want to play it again. May it keep working for anyone else
+who wants to revisit it too.
 
 ## Running the macOS release
 

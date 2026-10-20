@@ -7,9 +7,14 @@
 
 </pre>
 
-A 2d smooth scrolling ascii dungeon romp 
+A 2d smooth scrolling ascii dungeon romp
 
-This game is no longer actively developed, but I try to keep it compiling.
+> **This is a fork.** GoblinHack was created by Goblinhack (Neil McGill) and
+> the original project lives at https://github.com/goblinhack/goblinhack-game.
+> This fork only aims to keep the game building on current Linux and macOS
+> (SDL2 port fixes, build scripts, and release packaging for Linux and macOS).
+> It adds no gameplay of its own, and the game itself is not actively
+> developed. All credit for the game goes to the original author.
 
 ## Running the macOS release
 
@@ -39,9 +44,6 @@ Needs a C++ compiler, `autoconf`, `makedepend`, SDL2, SDL2_image, SDL2_mixer and
     ./ghack
 
 On macOS, if the compiler cannot find `<string>`, run `xcode-select --install`.
-
-You might also enjoy my other game (actively developed and work in progress)
-[Zorbash](https://github.com/goblinhack/zorbash)
 
 ![Alt text](screenshot.1.png?raw=true "")
 ![Alt text](screenshot.2.png?raw=true "")
